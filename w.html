@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Waste to Wealth | Intelligent Recycling</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#051a1a;
+  --card:rgba(10,40,40,.6);
+  --accent:#69f0ae;
+  --txt:#e0f2f1;
+
+  --wet:#a5d6a7;
+  --dry:#90caf9;
+  --metal:#ffd54f;
+  --glass:#ce93d8;
+  --haz:#ef9a9a;
+}
+
+body{
+  margin:0;
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:radial-gradient(circle,#0d3333,#051a1a);
+  color:var(--txt);
+}
+
+/* ---------- SECTIONS ---------- */
+.section{
+  min-height:100vh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  animation:fadeIn 1.2s ease;
+}
+.section.active{display:flex}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.card{
+  width:720px;
+  background:var(--card);
+  backdrop-filter:blur(14px);
+  border-radius:24px;
+  padding:2rem;
+  border:1px solid rgba(105,240,174,.3);
+}
+
+/* ---------- TEXT ---------- */
+h1{color:var(--accent);font-weight:300;letter-spacing:3px}
+.subtitle,.tagline{opacity:.7;font-size:.85rem}
+
+/* ---------- INPUT ---------- */
+input{
+  padding:12px;
+  width:60%;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.05);
+  color:white;
+}
+button{
+  margin-top:15px;
+  padding:10px 25px;
+  border:none;
+  border-radius:20px;
+  background:linear-gradient(90deg,#00ffae,#00c98b);
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ---------- BINS ---------- */
+.bins{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-top:1.5rem;
+}
+.bin{text-align:center}
+.bin-box{
+  height:80px;
+  background:rgba(255,255,255,.05);
+  border-radius:10px;
+  display:flex;
+  align-items:flex-end;
+}
+.fill{
+  width:100%;
+  height:0%;
+  transition:height 1s ease;
+}
+
+/* ---------- MARKET ---------- */
+.item{
+  border:1px solid rgba(105,240,174,.25);
+  padding:15px;
+  margin:10px auto;
+  border-radius:12px;
+  width:300px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div class="section active" id="home">
+  <div class="card">
+    <h1>Waste to Wealth</h1>
+    <p class="tagline">AI-powered sorting · Transparent rewards · Circular economy</p>
+    <button onclick="go('login')">Enter Platform</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="section" id="login">
+  <div class="card">
+    <h2>Welcome Back</h2>
+    <p class="tagline">Your waste has value</p>
+    <input placeholder="Username"><br><br>
+    <input type="password" placeholder="Password"><br>
+    <button onclick="go('ai')">Login</button>
+  </div>
+</div>
+
+<!-- AI SORTING -->
+<div class="section" id="ai">
+  <div class="card">
+    <h2>Waste Intelligence</h2>
+    <p class="subtitle">AI-driven waste segregation</p><br>
+
+    <input id="waste" placeholder="apple, bottle, battery...">
+    <br><button onclick="process()">Process Waste</button>
+
+    <p id="status" style="color:var(--accent)">System Ready</p>
+
+    <div class="bins">
+      <div class="bin">🥦<div class="bin-box"><div class="fill" id="wet"></div></div>Wet</div>
+      <div class="bin">🧴<div class="bin-box"><div class="fill" id="dry"></div></div>Dry</div>
+      <div class="bin">🔩<div class="bin-box"><div class="fill" id="metal"></div></div>Metal</div>
+      <div class="bin">🍷<div class="bin-box"><div class="fill" id="glass"></div></div>Glass</div>
+      <div class="bin">🧪<div class="bin-box"><div class="fill" id="hazard"></div></div>Hazard</div>
+    </div>
+
+    <br><button onclick="go('dashboard')">Continue</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="section" id="dashboard">
+  <div class="card">
+    <h2>Your Impact</h2>
+    <p>Eco Coins: <b id="coins">120</b></p>
+    <p>Waste Recycled: 10 kg</p>
+    <button onclick="go('market')">Marketplace</button>
+  </div>
+</div>
+
+<!-- MARKET -->
+<div class="section" id="market">
+  <div class="card">
+    <h2>Recycled Creations</h2>
+
+    <div class="item">
+      📘 Recycled Notebook – 20 Coins<br>
+      <button onclick="buy(20)">Buy</button>
+    </div>
+
+    <div class="item">
+      👜 Eco Cloth Bag – 30 Coins<br>
+      <button onclick="buy(30)">Buy</button>
+    </div>
+
+    <button onclick="go('dashboard')">Back</button>
+  </div>
+</div>
+
+<script>
+let coins=120
+let level={wet:0,dry:0,metal:0,glass:0,hazard:0}
+
+const map={
+  wet:['apple','banana','food'],
+  dry:['plastic','paper','bottle'],
+  metal:['can','iron'],
+  glass:['glass','jar'],
+  hazard:['battery','chemical','oil']
+}
+
+function go(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+}
+
+function process(){
+  const v=waste.value.toLowerCase()
+  let key
+  for(let k in map) if(map[k].some(x=>v.includes(x))) key=k
+  if(!key){status.innerText="Unknown waste";return}
+
+  level[key]=Math.min(100,level[key]+20)
+  document.getElementById(key).style.height=level[key]+"%"
+  status.innerText="Waste sorted successfully"
+  waste.value=""
+}
+
+function buy(cost){
+  if(coins>=cost){
+    coins-=cost
+    document.getElementById("coins").innerText=coins
+    alert("Purchased using Eco Coins 🌱")
+  }else alert("Not enough coins")
+}
+</script>
+
+</body>
+</html>
